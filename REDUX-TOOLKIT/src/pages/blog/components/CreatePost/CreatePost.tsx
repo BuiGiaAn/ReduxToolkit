@@ -6,7 +6,7 @@ import { RootState } from 'store'
 import Modal from 'react-bootstrap/Modal';
 import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { CopyIcon, CheckIcon } from "@chakra-ui/icons"
-
+import { Button } from "antd"
 
 const initialState = {
     title: '',
@@ -24,6 +24,8 @@ const CreatePost = ({ show, handleClose }: Modal) => {
     const [formData, setFormData] = useState<Post>(initialState)
     const editingPost = useSelector((state: RootState) => state.blog.editingPost)
     const [disabled, setDisabled] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
+
     const dispatch = useDispatch()
 
     useEffect(() => {
@@ -34,8 +36,10 @@ const CreatePost = ({ show, handleClose }: Modal) => {
         event.preventDefault()
         if (editingPost) {
             setDisabled(true)
+            setLoading(true)
             setTimeout(() => {
                 dispatch(finishEditingPost(formData))
+                setLoading(false)
                 setDisabled(false)
                 handleClose()
             }, 2000)
@@ -43,10 +47,14 @@ const CreatePost = ({ show, handleClose }: Modal) => {
         } else {
             const formDataWithId = { ...formData, id: new Date().toISOString() }
             setDisabled(true)
-            dispatch(addPost(formDataWithId))
-            setFormData(initialState)
-            setDisabled(false)
-            handleClose()
+            setLoading(true)
+            setTimeout(() => {
+                setLoading(false)
+                dispatch(addPost(formDataWithId))
+                setFormData(initialState)
+                setDisabled(false)
+                handleClose()
+            }, 2000)
         }
     }
 
@@ -168,40 +176,42 @@ const CreatePost = ({ show, handleClose }: Modal) => {
                         <Modal.Footer>
                             <div>
                                 {editingPost ? <>
-                                    <button
+                                    <Button
+                                        loading={loading}
                                         disabled={disabled}
-                                        type='submit'
-                                        className={`${disabled ? 'bg-gray-500' : 'bg-gradient-to-br from-teal-300 to-lime-300'} 
-                    group relative mb-2 mr-2 inline-flex items-center justify-center overflow-hidden 
-                    rounded-lg p-0.5 text-sm font-medium text-gray-900 
-                    focus:outline-none focus:ring-4 focus:ring-lime-200 
-                    group-hover:from-teal-300 group-hover:to-lime-300 
-                    dark:text-white dark:hover:text-gray-900 dark:focus:ring-lime-800`}
+                                        type="primary"
+                                        htmlType="submit"
+                                        className={`${disabled ? 'bg-gray-500' : 'bg-gradient-to-br from-teal-300 to-lime-300'
+                                            } mr-2`}
+
 
                                     >
-                                        <span className='relative rounded-md bg-white px-5 py-2.5 transition-all duration-75 ease-in group-hover:bg-opacity-0 dark:bg-gray-900'>
+                                        <span className='text-black'>
                                             Update Post
                                         </span>
-                                    </button>
-                                    <button
-                                        type='reset'
+                                    </Button>
+                                    <Button
+                                        type="primary"
+                                        htmlType="reset"
                                         className='group relative mb-2 mr-2 inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-red-200 via-red-300 to-yellow-200 p-0.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-red-100 group-hover:from-red-200 group-hover:via-red-300 group-hover:to-yellow-200 dark:text-white dark:hover:text-gray-900 dark:focus:ring-red-400'
                                         onClick={() => { handleCancelEditngPost() }}
                                     >
                                         <span
-                                            className='relative rounded-md bg-white px-5 py-2.5 transition-all duration-75 ease-in group-hover:bg-opacity-0 dark:bg-gray-900'>
+                                            className='relative rounded-md  px-5 py-2.5 transition-all duration-75 ease-in group-hover:bg-opacity-0 dark:bg-gray-900'>
                                             Cancel
                                         </span>
-                                    </button></>
+                                    </Button></>
                                     :
-                                    <button
+                                    <Button
+                                        loading={loading}
                                         className='group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-purple-600 to-blue-500 p-0.5 text-sm font-medium text-gray-900 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300 group-hover:from-purple-600 group-hover:to-blue-500 dark:text-white dark:focus:ring-blue-800'
-                                        type='submit'
+                                        type="primary"
+                                        htmlType="submit"
                                     >
-                                        <span className='relative rounded-md bg-white px-5 py-2.5 transition-all duration-75 ease-in group-hover:bg-opacity-0 dark:bg-gray-900'>
+                                        <span className='relative rounded-md px-5 py-2.5 transition-all duration-75 ease-in group-hover:bg-opacity-0 dark:bg-gray-900'>
                                             Publish Post
                                         </span>
-                                    </button>}
+                                    </Button>}
                             </div>
                         </Modal.Footer>
                     </form>
